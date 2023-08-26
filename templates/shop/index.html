@@ -1,0 +1,236 @@
+{% extends 'shop/basic.html' %}
+{% block title%}MyAwesomeCart{% endblock title%}
+{% block css %}
+
+.col-md-3
+{
+display: inline-block;
+margin-left:-4px;
+}
+.carousel-indicators .active {
+background-color: blue;
+  }
+
+
+body .carousel-indicator li{
+background-color: blue;
+}
+body .carousel-indicators{
+bottom: 0;
+}
+body .carousel-control-prev-icon,
+body .carousel-control-next-icon{
+background-color: blue;
+}
+ body .no-padding{
+ padding-left: 0,
+ padding-right: 0;
+ }
+
+ .blck{
+  display:block;
+  width:fit-content;
+ }
+
+
+  <!-- img{
+    display: block;
+     width: 60%;
+     margin: auto;
+     transition: transform .2s;
+     overflow:hidden;
+     
+  } -->
+  img:hover{
+    transform: scale(1.5); 
+    overflow:hidden;
+  }
+  <!-- .box{
+    overflow:hidden;
+  } -->
+  .mys{
+    height: 250px !important;
+    width: 250px !important;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next{
+    top:auto;
+    bottom:auto;
+  }
+  .mr{
+    margin-right:1rem;
+  }
+
+
+{% endblock css %}
+
+{% block body %}
+{% load static %}
+<div class="container">
+  {% for prod,range,no_of_slide,flag in ap %}
+
+  
+  <h1>{{prod.0.category}}</h1>
+  <div class="row">
+  <div id="demo{{forloop.counter}}" class="col carousel slide my-3" data-ride="carousel">
+      <ul class="carousel-indicators">
+        <li data-target="#demo{{forloop.counter}}" data-slide-to="0" class="active"></li>
+        {% for i in range %}
+        <li data-target="#demo{{forloop.parentloop.counter}}" data-slide-to="{{i}}" ></li>
+        {% endfor %}
+      </ul>
+  
+      <!--Slideshow starts here -->
+      <div class="container carousel-inner no-padding ">
+        
+        <div class="carousel-item active ">
+          {% comment %} <div class=" h-100 col-sm-3 col-md-3 ">
+            <div class="card h-100 box " style="width: 18rem;">
+              <!-- <div class="box"> -->
+                <img src='{{ prod.0.image.url }}' class="card-img-top mys" alt="...">
+             
+              <div class="card-body">
+                  <h5 class="card-title">{{ prod.0.p_name }}</h5>
+                  <p class="card-text">{{prod.0.desc}}</p>
+                  <p class="card-text">Rs.{{prod.0.price}}</p>
+                  <a href="#" class="btn btn-primary">Go somewhere</a>
+              </div>
+            </div>
+         </div> {% endcomment %}
+  
+          {% for i in prod%}
+          <div class=" h-100 col-sm-3 col-md-3 h-100">
+            <div class="card h-100 align-items-center" style="width: 18rem;">
+              <div class="box">
+                <img src='{{ i.image.url }}'  class="card-img-top mys" alt="...">
+              </div>
+              <div class="card-body">
+                <h5 class="card-title" id="npr{{i.id}}">{{ i.p_name }}</h5>
+                <p class="card-text">{{ i.desc }}</p>
+                <p class="card-text btn btn-light text-left font-weight-bold blck">Rs.<span id="price{{i.id}}">{{ i.price }}</span></p>
+                <span id="divpr{{i.id}}" class="divpr" ><button href="#" id="pr{{i.id}}" class="btn btn-primary cart mr">Add to Cart</button></span>
+                <a href="/shop/products/{{i.id}}"><button href="#" id="pr{{i.id}}" class="btn btn-primary cart">Quick View</button></a>
+              </div>
+            </div>
+          </div>
+
+          
+                
+          {% if forloop.counter|divisibleby:4 and forloop.counter > 0 and not forloop.last %}
+        </div><div class="carousel-item">
+          {% endif %}
+          {% endfor %}
+
+        </div>
+  
+        
+      </div>
+  </div>
+
+
+  
+      <!-- left and right controls for the slide -->
+      <a class="carousel-control-prev" href="#demo{{forloop.counter}}" data-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+      </a>
+      <a class="carousel-control-next" href="#demo{{forloop.counter}}" data-slide="next">
+          <span class="carousel-control-next-icon"></span>
+      </a>
+    </div>
+    {% endfor %}
+  
+  </div>
+  
+{% endblock body%}
+{% block js %}
+    <script>
+      {% comment %} $('.cart').click(function(){ {% endcomment %}
+      updateCart(cart);
+        $('.divpr').on('click','button.cart',function(){
+        var idstr=this.id.toString();
+        var prc="price" + idstr.slice(2,)
+
+      if(cart[idstr]!=undefined){
+        cart[idstr][0]+=1;
+      }
+      else{
+        var name=document.getElementById('n'+ idstr).innerHTML;
+        var price=document.getElementById(prc).innerHTML
+        cart[idstr]=[1,name,price];
+      }
+      
+      updateCart(cart);
+      localStorage.setItem('cart',JSON.stringify(cart));
+      });
+
+      
+      function updateCart(cart){
+        var ti=0
+        for(var item in cart){
+          if(item=="cnt"){
+            continue;
+          }
+          if(cart[item][0]>0){
+            ti+=cart[item][0]
+            
+          document.getElementById('div'+ item).innerHTML="<button id='minus" + item +"' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>"+ cart[item][0] + " </span> <button id='plus" + item +"' class='btn btn-primary plus mr'>+</button>" ;
+          updatepopover(cart);
+          localStorage.setItem('cart',JSON.stringify(cart));
+        }
+        else{
+          document.getElementById('div'+ item).innerHTML='<button href="#" id="'+item+ '"class="btn btn-primary cart mr">Add to Cart</button>';
+          updatepopover(cart);
+          localStorage.setItem('cart',JSON.stringify(cart));
+        }
+
+      }
+      document.getElementById('cart').innerHTML=ti;
+      updatepopover(cart);
+      $('#pop').popover('show');
+      
+      }
+    
+      $('.divpr').on("click","button.minus",function(){
+        cart=JSON.parse(localStorage.getItem('cart'));
+        a=this.id.slice(5,);
+        if(cart[a]!=null){
+          
+        
+        {% comment %} console.log(cart[a]) {% endcomment %}
+        if(cart[a][0]>0){
+          cart[a][0]-=1
+          cart[a][0]=Math.max(0,cart[a][0]);
+          updateCart(cart);}
+          else{
+
+            updateCart(cart);
+          }
+        }
+
+      });
+      $('.divpr').on("click","button.plus",function(){
+        cart=JSON.parse(localStorage.getItem('cart'));
+        a=this.id.slice(4,);
+        cart[a][0]+=1
+        updateCart(cart);
+      });
+
+      function clearcart(){
+        for(var item in cart){
+          if(item=='cnt'){
+            continue;
+          }
+          document.getElementById('div'+ item).innerHTML='<button href="#" id="'+item+ '"class="btn btn-primary cart">Add to Cart</button>';
+        }
+        
+        localStorage.clear();
+        cart={};
+        var tp=0
+        updateCart(cart)
+      }
+
+    </script>
+{% endblock js %}
+
+
